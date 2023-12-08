@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class Product:
     """
@@ -10,11 +11,11 @@ class Product:
     description: str
     quantity: int
 
-    def __init__(self, name, price, description, quantity):
-        self.name = name
-        self.price = price
-        self.description = description
-        self.quantity = quantity
+    # def __init__(self, name, price, description, quantity):
+    #     self.name = name
+    #     self.price = price
+    #     self.description = description
+    #     self.quantity = quantity
 
     # def __eq__(self, other) -> bool:
     #     return (self.name == other.name and
@@ -27,6 +28,11 @@ class Product:
         TODO Верните True если количество продукта больше или равно запрашиваемому
             и False в обратном случае
         """
+        if isinstance(quantity, int) is False:
+            raise TypeError("В параметре 'quantity' ожидается тип integer")
+        elif quantity <= 0:
+            raise ValueError("Параметр 'quantity' должен быть больше нуля")
+
         if self.quantity >= quantity:
             return True
         return False
@@ -37,11 +43,18 @@ class Product:
             Проверьте количество продукта используя метод check_quantity
             Если продуктов не хватает, то выбросите исключение ValueError
         """
+        if isinstance(quantity, int) is False:
+            raise TypeError("В параметре 'quantity' ожидается тип integer")
+        elif quantity <= 0:
+            raise ValueError("Параметр 'quantity' должен быть больше нуля")
+
         if self.check_quantity(quantity) is False:
-            raise ValueError
+            raise ValueError(f"Товар {self.name} отсутствует на складе в количестве {quantity} штук")
+        return True
 
     def __hash__(self):
         return hash(self.name + self.description)
+
 
 @dataclass
 class Cart:
@@ -77,7 +90,6 @@ class Cart:
         Если remove_count не передан, то удаляется вся позиция
         Если remove_count больше, чем количество продуктов в позиции, то удаляется вся позиция
         """
-
         for added_product in self.products.keys():
             if product.__eq__(added_product) is True:
                 if remove_count is None or remove_count >= self.products[added_product]:
@@ -86,7 +98,7 @@ class Cart:
                 else:
                     self.products[added_product] -= remove_count
                     return
-        raise ValueError
+        raise ValueError(f"Продукт {product.name} не добавлен в корзину")
 
     def clear(self):
         return self.products.clear()
@@ -105,9 +117,7 @@ class Cart:
         """
 
         for added_product in self.products.keys():
-            if added_product.check_quantity(quantity=self.products[added_product]) is False:
-                raise ValueError(f"Продукт {added_product.name} "
-                                 f"отсутствует на складе в количестве {self.products[added_product]} штук")
+            added_product.buy(quantity=self.products[added_product])
         total_price = self.get_total_price()
         print(f'Заказ на сумму {total_price} оформлен')
-        return total_price
+        return f'Заказ на сумму {total_price} оформлен'
